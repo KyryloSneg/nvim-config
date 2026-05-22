@@ -4,6 +4,9 @@
 vim.keymap.set("n", "<C-a>", "vag", { desc = "Select all file content", remap = true })
 vim.keymap.set("v", "<C-a>", "ag", { desc = "Select all file content", remap = true })
 
+vim.keymap.set("n", "<C-c>", "gcc", { desc = "Comment (out) current line", remap = true })
+vim.keymap.set("v", "<C-c>", "gc", { desc = "Comment (out) selected lines", remap = true })
+
 vim.keymap.set("n", "<M-L>", "<cmd>BufferLineMoveNext<cr>", { desc = "Move buffer right" })
 vim.keymap.set("n", "<M-H>", "<cmd>BufferLineMovePrev<cr>", { desc = "Move buffer left" })
 vim.keymap.set({ "n", "x" }, "gg", "gg0", { desc = "Go to first line and first symbol" })
@@ -26,7 +29,6 @@ vim.keymap.set("n", "<F3>", function()
   vim.fn.setreg("+", name)
 end, { desc = "Copy filename without any extension" })
 
--- Force Ctrl+e to open Neo-tree instead of Snacks Explorer
 vim.keymap.set("n", "<C-e>", ":Neotree toggle<CR>", { desc = "Neo-tree Toggle" })
 
 -- Fix 'c' and 'C' to not copy to clipboard
@@ -102,3 +104,9 @@ vim.keymap.set("v", "<M-K>", function()
 end, { desc = "Duplicate Up" })
 
 vim.keymap.set("n", "J", "<Nop>", { desc = "Disable built-in line join" })
+
+-- Override default LazyVim behavior to search in CWD instead of Project Root
+vim.keymap.set("n", "<leader><space>", LazyVim.pick("files", { root = false }), { desc = "Find Files (cwd)" })
+
+-- Optional: Do the same for your global text search (grep)
+vim.keymap.set("n", "<leader>/", LazyVim.pick("live_grep", { root = false }), { desc = "Grep (cwd)" })

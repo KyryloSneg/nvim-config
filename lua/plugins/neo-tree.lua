@@ -16,6 +16,11 @@ return {
         },
       },
 
+      follow_current_file = {
+        enabled = true, -- This enables the feature
+        leave_dirs_open = false, -- Closes other directories when switching files
+      },
+
       filtered_items = {
         visible = true, -- Show filtered items in a different highlight group
         hide_dotfiles = false, -- Do not hide files starting with a dot

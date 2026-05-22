@@ -4,6 +4,37 @@ return {
     autoformat = true,
     servers = {
       vtsls = {
+        capabilities = {
+          textDocument = {
+            completion = {
+              completionItem = {
+                snippetSupport = true,
+              },
+              -- Inject your path symbols directly into the server's native response schema
+              completionProvider = {
+                triggerCharacters = { ".", "/", '"', "'", "`", "@" },
+              },
+            },
+          },
+        },
+        handlers = {
+          ["textDocument/publishDiagnostics"] = function(_, result, ctx, config)
+            if result and result.diagnostics then
+              local filtered = {}
+              for _, d in ipairs(result.diagnostics) do
+                -- 6133: unused variable, 6196: unused declaration
+                if d.code ~= 6133 and d.code ~= 6196 then
+                  table.insert(filtered, d)
+                end
+              end
+              result.diagnostics = filtered
+            end
+            vim.lsp.diagnostic.on_publish_diagnostics(_, result, ctx, config)
+          end,
+        },
+        inlay_hints = {
+          enabled = false,
+        },
         settings = {
           typescript = {
             format = {
@@ -14,6 +45,10 @@ return {
             updateImportsOnFileMove = { enabled = "always" },
             suggest = {
               completeFunctionCalls = false,
+            },
+            preferences = {
+              -- Options: "non-relative" (prefers alias), "relative", "shortest", or "project-relative"
+              importModuleSpecifier = "non-relative",
             },
           },
           javascript = {
@@ -27,10 +62,25 @@ return {
               -- And for JS
               completeFunctionCalls = false,
             },
+            preferences = {
+              -- Options: "non-relative" (prefers alias), "relative", "shortest", or "project-relative"
+              importModuleSpecifier = "non-relative",
+            },
           },
           vtsls = {
             autoCompleteFunctionCalls = false,
             autoOrganizeImports = false,
+          },
+        },
+      },
+      vue_ls = {
+        capabilities = {
+          textDocument = {
+            completion = {
+              completionProvider = {
+                triggerCharacters = { ".", "/", '"', "'", "`", "@" },
+              },
+            },
           },
         },
       },
@@ -46,29 +96,6 @@ return {
           opts.settings.typescript.suggest = opts.settings.typescript.suggest or {}
           -- Disable complete functions with parenthesis
           opts.settings.typescript.suggest.completeFunctionCalls = false
-
-          -- Ensure "/" and "@" are in the trigger list instead of clearing it
-          if client.server_capabilities.completionProvider then
-            local triggers = client.server_capabilities.completionProvider.triggerCharacters or {}
-            if not vim.tbl_contains(triggers, "/") then
-              table.insert(triggers, "/")
-            end
-            if not vim.tbl_contains(triggers, "@") then
-              table.insert(triggers, "@")
-            end
-            client.server_capabilities.completionProvider.triggerCharacters = triggers
-          end
-        end
-      end,
-      vue_ls = function(_, opts)
-        opts.on_attach = function(client)
-          if client.server_capabilities.completionProvider then
-            local triggers = client.server_capabilities.completionProvider.triggerCharacters or {}
-            if not vim.tbl_contains(triggers, "/") then
-              table.insert(triggers, "/")
-            end
-            client.server_capabilities.completionProvider.triggerCharacters = triggers
-          end
         end
       end,
     },
