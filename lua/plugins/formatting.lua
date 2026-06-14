@@ -8,6 +8,13 @@ return {
       typescriptreact = { "organize_imports", "prettier" },
       javascriptreact = { "organize_imports", "prettier" },
       vue = { "organize_imports", "prettier" },
+      prisma = { "prisma_format" },
+    },
+    formatters = {
+      prisma_format = {
+        -- prisma format needs to write/read temp files instead of standard input
+        stdin = false,
+      },
     },
   },
 }

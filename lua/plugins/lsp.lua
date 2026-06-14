@@ -2,6 +2,9 @@ return {
   "neovim/nvim-lspconfig",
   opts = {
     autoformat = true,
+    inlay_hints = {
+      enabled = false,
+    },
     servers = {
       vtsls = {
         capabilities = {
@@ -32,9 +35,6 @@ return {
             vim.lsp.diagnostic.on_publish_diagnostics(_, result, ctx, config)
           end,
         },
-        inlay_hints = {
-          enabled = false,
-        },
         settings = {
           typescript = {
             format = {
@@ -49,6 +49,7 @@ return {
             preferences = {
               -- Options: "non-relative" (prefers alias), "relative", "shortest", or "project-relative"
               importModuleSpecifier = "non-relative",
+              preferTypeOnlyAutoImports = true,
             },
           },
           javascript = {
@@ -65,6 +66,7 @@ return {
             preferences = {
               -- Options: "non-relative" (prefers alias), "relative", "shortest", or "project-relative"
               importModuleSpecifier = "non-relative",
+              preferTypeOnlyAutoImports = true,
             },
           },
           vtsls = {
