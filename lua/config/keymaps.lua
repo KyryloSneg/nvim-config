@@ -110,3 +110,36 @@ vim.keymap.set("n", "<leader><space>", LazyVim.pick("files", { root = false }), 
 
 -- Optional: Do the same for your global text search (grep)
 vim.keymap.set("n", "<leader>/", LazyVim.pick("live_grep", { root = false }), { desc = "Grep (cwd)" })
+
+-- Save and run C++ or C# with <leader>r
+vim.keymap.set("n", "<leader>cR", function()
+  vim.cmd("w")
+  local ft = vim.bo.filetype
+
+  if ft == "cpp" then
+    local file = vim.fn.expand("%:p")
+    local output = vim.fn.expand("%:p:r")
+    vim.cmd(
+      "split | terminal g++ -std=c++20 -Wall -g "
+        .. vim.fn.shellescape(file)
+        .. " -o "
+        .. vim.fn.shellescape(output)
+        .. " && "
+        .. vim.fn.shellescape(output)
+    )
+    vim.cmd("startinsert")
+  elseif ft == "cs" then
+    local dir = vim.fn.expand("%:p:h")
+    local csproj = vim.fn.glob(dir .. "/*.csproj")
+
+    -- If no .csproj exists in the folder, create one automatically before running
+    if csproj == "" then
+      vim.cmd("split | terminal cd " .. vim.fn.shellescape(dir) .. " && dotnet new console --force && dotnet run")
+    else
+      vim.cmd("split | terminal cd " .. vim.fn.shellescape(dir) .. " && dotnet run")
+    end
+    vim.cmd("startinsert")
+  else
+    vim.notify("No runner configured for filetype: " .. ft, vim.log.levels.WARN)
+  end
+end, { desc = "Run Code" })
