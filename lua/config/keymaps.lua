@@ -111,28 +111,48 @@ vim.keymap.set("n", "<leader><space>", LazyVim.pick("files", { root = false }), 
 -- Optional: Do the same for your global text search (grep)
 vim.keymap.set("n", "<leader>/", LazyVim.pick("live_grep", { root = false }), { desc = "Grep (cwd)" })
 
--- Save and run C++ or C# with <leader>r
+-- Save and run C++, C#, or CMake projects with <leader>cR
 vim.keymap.set("n", "<leader>cR", function()
   vim.cmd("w")
   local ft = vim.bo.filetype
+  local dir = vim.fn.expand("%:p:h")
 
   if ft == "cpp" then
-    local file = vim.fn.expand("%:p")
-    local output = vim.fn.expand("%:p:r")
-    vim.cmd(
-      "split | terminal g++ -std=c++20 -Wall -g "
-        .. vim.fn.shellescape(file)
-        .. " -o "
-        .. vim.fn.shellescape(output)
-        .. " && "
-        .. vim.fn.shellescape(output)
-    )
+    -- Check if this is a CMake project by looking for CMakeLists.txt in the current directory
+    local has_cmake = vim.fn.filereadable(dir .. "/CMakeLists.txt") == 1
+
+    if has_cmake then
+      -- Multi-file CMake Workflow
+      -- 1. Create a 'build' directory and configure (-B build)
+      -- 2. Compile the project (--build build)
+      -- 3. Execute the binary (assumes binary matches project folder name, or change to ./build/my_app)
+      -- Note: Using 'basename' to guess the output executable name dynamically
+      local binary_name = vim.fn.fnamemodify(dir, ":t")
+      vim.cmd(
+        "split | terminal cd "
+          .. vim.fn.shellescape(dir)
+          .. " && cmake -B build -DCMAKE_BUILD_TYPE=Debug"
+          .. " && cmake --build build"
+          .. " && ./build/"
+          .. binary_name
+      )
+    else
+      -- Fallback to your original Single-File Workflow
+      local file = vim.fn.expand("%:p")
+      local output = vim.fn.expand("%:p:r")
+      vim.cmd(
+        "split | terminal g++ -std=c++20 -Wall -g "
+          .. vim.fn.shellescape(file)
+          .. " -o "
+          .. vim.fn.shellescape(output)
+          .. " && "
+          .. vim.fn.shellescape(output)
+      )
+    end
     vim.cmd("startinsert")
   elseif ft == "cs" then
-    local dir = vim.fn.expand("%:p:h")
+    -- Your original C# logic remains perfectly preserved
     local csproj = vim.fn.glob(dir .. "/*.csproj")
-
-    -- If no .csproj exists in the folder, create one automatically before running
     if csproj == "" then
       vim.cmd("split | terminal cd " .. vim.fn.shellescape(dir) .. " && dotnet new console --force && dotnet run")
     else
